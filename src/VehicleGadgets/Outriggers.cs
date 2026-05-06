@@ -1,11 +1,12 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets
+namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
-    using System.Windows.Forms;
     using System.Linq;
+    using System.Numerics;
 
-    using Rage;
-    
+    using CitizenFX.Core;
+    using CitizenFX.Core.Native;
+
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
     internal sealed class Outriggers : VehicleGadget
@@ -55,7 +56,7 @@
 
                 loop = outriggersDataEntry.SoundsSet.HasLoop ?
                             outriggersDataEntry.SoundsSet.IsDefaultLoop ?
-                                new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_outriggers_loop) :
+                                new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => (System.IO.Stream)Properties.Resources.default_outriggers_loop) :
                                 new Sound(true, outriggersDataEntry.SoundsSet.NormalizedVolume, () => outriggersDataEntry.SoundsSet.LoopSoundFilePath) :
                             null;
 
@@ -77,9 +78,9 @@
 
         public override void Update(bool isPlayerIn)
         {
-            bool isAnyOutriggerMoving = false; 
+            bool isAnyOutriggerMoving = false;
 
-            float delta = Game.FrameTime;
+            float delta = API.GetFrameTime();
             for (int i = 0; i < outriggers.Length; i++)
             {
                 Outrigger r = outriggers[i];
@@ -90,18 +91,14 @@
             if (sound != null)
             {
                 if (isAnyOutriggerMoving)
-                {
                     sound.Play();
-                }
                 else
-                {
                     sound.Stop();
-                }
 
                 sound.Update();
             }
 
-            if (isPlayerIn && Game.IsKeyDown(Keys.O))
+            if (isPlayerIn && Input.IsKeyDown(Input.O))
             {
                 if (outriggers.All(o => o.State == OutriggersState.Undeployed))
                 {
@@ -134,7 +131,6 @@
             float currentExtendDistance;
             float currentSupportDistance;
 
-            // TODO: read state from distances between current and original positions, otherwise when repaired and outriggers deployed, will mess things up
             public OutriggersState State { get; set; }
             public UpDownState VerticalState { get; set; }
 
@@ -148,12 +144,12 @@
 
                 if (!VehicleBone.TryGetForVehicle(vehicle, data.ExtensionBoneName, out extensionBone))
                 {
-                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{data.ExtensionBoneName}\" for the Outrigger Extension");
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{data.ExtensionBoneName}\" for the Outrigger Extension");
                 }
 
                 if (!VehicleBone.TryGetForVehicle(vehicle, data.SupportBoneName, out supportBone))
                 {
-                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{data.SupportBoneName}\" for the Outrigger Support");
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{data.SupportBoneName}\" for the Outrigger Support");
                 }
             }
 
@@ -162,32 +158,23 @@
                 switch (State)
                 {
                     case OutriggersState.Undeploying:
+                        if (VerticalState == UpDownState.None)
                         {
-                            if (VerticalState == UpDownState.None) // wait for the legs to go up
-                            {
-                                float moveDist = data.ExtensionMoveSpeed * delta;
-                                Vector3 translation = -extensionDirection * moveDist;
-
-                                currentExtendDistance -= Math.Abs(moveDist);
-
-                                extensionBone.Translate(translation);
-
-                                if (currentExtendDistance <= 0.0f)
-                                {
-                                    State = OutriggersState.Undeployed;
-                                }
-                            }
+                            float moveDist = data.ExtensionMoveSpeed * delta;
+                            Vector3 translation = -extensionDirection * moveDist;
+                            currentExtendDistance -= Math.Abs(moveDist);
+                            extensionBone.Translate(translation);
+                            if (currentExtendDistance <= 0.0f)
+                                State = OutriggersState.Undeployed;
                         }
                         break;
+
                     case OutriggersState.Deploying:
                         {
                             float moveDist = data.ExtensionMoveSpeed * delta;
                             Vector3 translation = extensionDirection * moveDist;
-
                             currentExtendDistance += Math.Abs(moveDist);
-
                             extensionBone.Translate(translation);
-
                             if (currentExtendDistance >= data.ExtensionDistance)
                             {
                                 State = OutriggersState.Deployed;
@@ -197,37 +184,27 @@
                         break;
                 }
 
-
                 switch (VerticalState)
                 {
                     case UpDownState.Up:
                         {
                             float moveDist = data.SupportMoveSpeed * delta;
                             Vector3 translation = -supportDirection * moveDist;
-
                             currentSupportDistance -= Math.Abs(moveDist);
-
                             supportBone.Translate(translation);
-
                             if (currentSupportDistance <= 0.0f)
-                            {
                                 VerticalState = UpDownState.None;
-                            }
                         }
                         break;
+
                     case UpDownState.Down:
                         {
                             float moveDist = data.SupportMoveSpeed * delta;
                             Vector3 translation = supportDirection * moveDist;
-
                             currentSupportDistance += Math.Abs(moveDist);
-
                             supportBone.Translate(translation);
-
                             if (currentSupportDistance >= data.SupportDistance)
-                            {
                                 VerticalState = UpDownState.None;
-                            }
                         }
                         break;
                 }

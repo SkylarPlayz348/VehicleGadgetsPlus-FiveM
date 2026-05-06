@@ -1,9 +1,8 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets.XML
+namespace VehicleGadgetsPlus.VehicleGadgets.XML
 {
     using System;
+    using System.Numerics;
     using System.Xml.Serialization;
-
-    using Rage;
 
     [XmlType(TypeName = XmlName)]
     public sealed class RotatingPartEntry : VehicleGadgetEntry
@@ -20,7 +19,6 @@
         [XmlElement(IsNullable = true)] public AngleRange Range { get; set; }
 
         [XmlIgnore] public bool HasRange => Range != null;
-
 
         public sealed class AngleRange
         {

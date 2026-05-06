@@ -1,10 +1,10 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets
+namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
-    using System.IO;
-    using System.Windows.Forms;
+    using System.Numerics;
 
-    using Rage;
+    using CitizenFX.Core;
+    using CitizenFX.Core.Native;
 
     using VehicleGadgetsPlus.VehicleGadgets.XML;
     using VehicleGadgetsPlus.Memory;
@@ -29,12 +29,12 @@
         public Ladder(Vehicle vehicle, VehicleGadgetEntry dataEntry) : base(vehicle, dataEntry)
         {
             ladderDataEntry = (LadderEntry)dataEntry;
-            
+
             if (ladderDataEntry.HasBase)
             {
                 if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Base.BoneName, out ladderBase))
                 {
-                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Base.BoneName}\" for the Ladder Base");
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{ladderDataEntry.Base.BoneName}\" for the Ladder Base");
                 }
             }
 
@@ -42,7 +42,7 @@
             {
                 if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Main.BoneName, out ladderMain))
                 {
-                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Main.BoneName}\" for the Ladder Main");
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{ladderDataEntry.Main.BoneName}\" for the Ladder Main");
                 }
             }
 
@@ -54,7 +54,7 @@
                 {
                     if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Extensions.Parts[i].BoneName, out VehicleBone extensionBone))
                     {
-                        throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Extensions.Parts[i].BoneName}\" for the Ladder Extension #{i}");
+                        throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{ladderDataEntry.Extensions.Parts[i].BoneName}\" for the Ladder Extension #{i}");
                     }
 
                     ladderExtensions[i] = new Extension(this, ladderDataEntry.Extensions.Parts[i], ladderDataEntry.Extensions.Direction, extensionBone);
@@ -65,7 +65,7 @@
             {
                 if (!VehicleBone.TryGetForVehicle(vehicle, ladderDataEntry.Bucket.BoneName, out ladderBucket))
                 {
-                    throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{ladderDataEntry.Bucket.BoneName}\" for the Ladder Bucket");
+                    throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{ladderDataEntry.Bucket.BoneName}\" for the Ladder Bucket");
                 }
             }
 
@@ -81,13 +81,13 @@
 
                 loop = ladderDataEntry.SoundsSet.HasLoop ?
                             ladderDataEntry.SoundsSet.IsDefaultLoop ?
-                                new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_loop) :
+                                new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => (System.IO.Stream)Properties.Resources.default_ladder_loop) :
                                 new Sound(true, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.LoopSoundFilePath) :
                             null;
 
                 end = ladderDataEntry.SoundsSet.HasEnd ?
                             ladderDataEntry.SoundsSet.IsDefaultEnd ?
-                                new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => Properties.Resources.default_ladder_end) :
+                                new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => (System.IO.Stream)Properties.Resources.default_ladder_end) :
                                 new Sound(false, ladderDataEntry.SoundsSet.NormalizedVolume, () => ladderDataEntry.SoundsSet.EndSoundFilePath) :
                             null;
 
@@ -103,76 +103,53 @@
 
         public override unsafe void Update(bool isPlayerIn)
         {
-
             if (!isPlayerIn)
-            {
                 return;
-            }
 
             shouldPlaySound = false;
-            
+
             // left/right
             if (HasBase)
             {
-                if (Game.IsKeyDownRightNow(Keys.NumPad6))
-                {
+                if (Input.IsKeyDownRightNow(Input.NumPad6))
                     RotateBaseRight();
-                }
-                else if (Game.IsKeyDownRightNow(Keys.NumPad4))
-                {
+                else if (Input.IsKeyDownRightNow(Input.NumPad4))
                     RotateBaseLeft();
-                }
             }
-            
+
             // up/down
             if (HasMain)
             {
-                if (Game.IsKeyDownRightNow(Keys.NumPad8))
-                {
+                if (Input.IsKeyDownRightNow(Input.NumPad8))
                     RotateMainUp();
-                }
-                else if (Game.IsKeyDownRightNow(Keys.NumPad2))
-                {
+                else if (Input.IsKeyDownRightNow(Input.NumPad2))
                     RotateMainDown();
-                }
             }
 
             // extend
             if (HasExtensions)
             {
-                if (Game.IsKeyDownRightNow(Keys.NumPad9))
-                {
+                if (Input.IsKeyDownRightNow(Input.NumPad9))
                     ExtendLadder();
-                }
-                else if (Game.IsKeyDownRightNow(Keys.NumPad3))
-                {
+                else if (Input.IsKeyDownRightNow(Input.NumPad3))
                     RetractLadder();
-                }
             }
 
             // bucket up/down
             if (HasBucket)
             {
-                if (Game.IsKeyDownRightNow(Keys.NumPad7))
-                {
+                if (Input.IsKeyDownRightNow(Input.NumPad7))
                     RotateBucketUp();
-                }
-                else if (Game.IsKeyDownRightNow(Keys.NumPad1))
-                {
+                else if (Input.IsKeyDownRightNow(Input.NumPad1))
                     RotateBucketDown();
-                }
             }
 
             if (sound != null)
             {
                 if (shouldPlaySound)
-                {
                     sound.Play();
-                }
                 else
-                {
                     sound.Stop();
-                }
 
                 sound.Update();
             }
@@ -180,141 +157,113 @@
 
         private void RotateBaseLeft()
         {
-            if (!HasBase)
-                return;
-
+            if (!HasBase) return;
             Vector3 axis = ladderDataEntry.Base.RotationAxis;
-            float degrees = ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
+            float degrees = ladderDataEntry.Base.RotationSpeed * API.GetFrameTime();
             ladderBase.RotateAxis(axis, degrees);
-
             shouldPlaySound = true;
         }
 
         private void RotateBaseRight()
         {
-            if (!HasBase)
-                return;
-
+            if (!HasBase) return;
             Vector3 axis = ladderDataEntry.Base.RotationAxis;
-            float degrees = -ladderDataEntry.Base.RotationSpeed * Game.FrameTime;
+            float degrees = -ladderDataEntry.Base.RotationSpeed * API.GetFrameTime();
             ladderBase.RotateAxis(axis, degrees);
-
             shouldPlaySound = true;
         }
 
         private void RotateMainUp()
         {
-            if (!HasMain)
-                return;
-
-            Matrix m = ladderMain.Matrix;
+            if (!HasMain) return;
+            Matrix4x4 m = ladderMain.Matrix;
             float angle = GetAngle(m, ladderMain.OriginalRotation, ladderDataEntry.Main.RotationAxis);
-
             if (angle < ladderDataEntry.Main.MaxAngle)
             {
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
-                float degrees = ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
+                float degrees = ladderDataEntry.Main.RotationSpeed * API.GetFrameTime();
                 ladderMain.RotateAxis(axis, degrees);
-
                 shouldPlaySound = true;
             }
         }
 
         private void RotateMainDown()
         {
-            if (!HasMain)
-                return;
-
-            Matrix m = ladderMain.Matrix;
+            if (!HasMain) return;
+            Matrix4x4 m = ladderMain.Matrix;
             float angle = GetAngle(m, ladderMain.OriginalRotation, ladderDataEntry.Main.RotationAxis);
-
             if (angle > ladderDataEntry.Main.MinAngle)
             {
                 Vector3 axis = ladderDataEntry.Main.RotationAxis;
-                float degrees = -ladderDataEntry.Main.RotationSpeed * Game.FrameTime;
+                float degrees = -ladderDataEntry.Main.RotationSpeed * API.GetFrameTime();
                 ladderMain.RotateAxis(axis, degrees);
-
                 shouldPlaySound = true;
             }
         }
 
         private void ExtendLadder()
         {
-            if (!HasExtensions)
-                return;
-
+            if (!HasExtensions) return;
             for (int i = 0; i < ladderExtensions.Length; i++)
             {
                 if (ladderExtensions[i].Extend())
-                {
                     shouldPlaySound = true;
-                }
             }
         }
 
         private void RetractLadder()
         {
-            if (!HasExtensions)
-                return;
-
+            if (!HasExtensions) return;
             for (int i = 0; i < ladderExtensions.Length; i++)
             {
                 if (ladderExtensions[i].Retract())
-                {
                     shouldPlaySound = true;
-                }
             }
         }
 
         private void RotateBucketUp()
         {
-            if (!HasBucket)
-                return;
-            
-            Matrix m = ladderBucket.Matrix;
+            if (!HasBucket) return;
+            Matrix4x4 m = ladderBucket.Matrix;
             float angle = GetAngle(m, ladderBucket.OriginalRotation, ladderDataEntry.Bucket.RotationAxis);
-
             if (angle < ladderDataEntry.Bucket.MaxAngle)
             {
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
-                float degrees = ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
+                float degrees = ladderDataEntry.Bucket.RotationSpeed * API.GetFrameTime();
                 ladderBucket.RotateAxis(axis, degrees);
-
                 shouldPlaySound = true;
             }
         }
 
         private void RotateBucketDown()
         {
-            if (!HasBucket)
-                return;
-
-            Matrix m = ladderBucket.Matrix;
+            if (!HasBucket) return;
+            Matrix4x4 m = ladderBucket.Matrix;
             float angle = GetAngle(m, ladderBucket.OriginalRotation, ladderDataEntry.Bucket.RotationAxis);
-
             if (angle > ladderDataEntry.Bucket.MinAngle)
             {
                 Vector3 axis = ladderDataEntry.Bucket.RotationAxis;
-                float degrees = -ladderDataEntry.Bucket.RotationSpeed * Game.FrameTime;
+                float degrees = -ladderDataEntry.Bucket.RotationSpeed * API.GetFrameTime();
                 ladderBucket.RotateAxis(axis, degrees);
-
                 shouldPlaySound = true;
             }
         }
 
-        private float GetAngle(Matrix matrix, Quaternion originalRotation, Vector3 axis)
+        private float GetAngle(Matrix4x4 matrix, Quaternion originalRotation, Vector3 axis)
         {
-            matrix.Decompose(out _, out Quaternion rotation, out _);
+            Matrix4x4.Decompose(matrix, out _, out Quaternion rotation, out _);
 
-            Vector3 rotationVector = rotation.ToVector();
-            Vector3 origRotationVector = originalRotation.ToVector();
+            // Extract the imaginary (XYZ) part of each quaternion as direction vectors
+            Vector3 rotationVector = new Vector3(rotation.X, rotation.Y, rotation.Z);
+            Vector3 origRotationVector = new Vector3(originalRotation.X, originalRotation.Y, originalRotation.Z);
             Vector3 planeNormal = Vector3.Cross(axis, origRotationVector);
 
-            float angle = MathHelper.ConvertRadiansToDegrees(Math.Asin(Vector3.Dot(planeNormal, rotationVector) / (planeNormal.Length() * rotationVector.Length())));
+            float angle = (float)(Math.Asin(Vector3.Dot(planeNormal, rotationVector) /
+                (planeNormal.Length() * rotationVector.Length()))
+                * (180.0 / Math.PI));
 
             return angle;
         }
-
 
 
         private class Extension
@@ -331,9 +280,8 @@
             {
                 get
                 {
-                    Matrix matrix = bone.Matrix;
+                    Matrix4x4 matrix = bone.Matrix;
                     Vector3 translation = MatrixUtils.DecomposeTranslation(matrix);
-
                     return Vector3.DistanceSquared(translation, bone.OriginalTranslation);
                 }
             }
@@ -344,23 +292,22 @@
                 extensionData = data;
                 this.direction = direction;
                 this.bone = bone;
-
                 MaxDistanceSqr = extensionData.ExtensionDistance * extensionData.ExtensionDistance;
             }
-
 
             public bool Extend()
             {
                 if (CurrentDistanceSqr >= MaxDistanceSqr)
                     return false;
-                
-                float moveDist = extensionData.MoveSpeed * Game.FrameTime;
+
+                float moveDist = extensionData.MoveSpeed * API.GetFrameTime();
                 Vector3 translation = direction * moveDist;
 
-                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * bone.Matrix;
+                Matrix4x4 newMatrix = Matrix4x4.CreateScale(1.0f, 1.0f, 1.0f)
+                    * Matrix4x4.CreateTranslation(translation)
+                    * bone.Matrix;
                 float newDistanceSqr = Vector3.DistanceSquared(MatrixUtils.DecomposeTranslation(newMatrix), bone.OriginalTranslation);
 
-                // check if the new matrix overpasses the distance limits
                 if (newDistanceSqr > MaxDistanceSqr)
                     return false;
 
@@ -373,14 +320,15 @@
                 float currentDistanceSqr = CurrentDistanceSqr;
                 if (currentDistanceSqr < 0.015f * 0.015f)
                     return false;
-                
-                float moveDist = extensionData.MoveSpeed * Game.FrameTime;
+
+                float moveDist = extensionData.MoveSpeed * API.GetFrameTime();
                 Vector3 translation = -direction * moveDist;
 
-                Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * bone.Matrix;
+                Matrix4x4 newMatrix = Matrix4x4.CreateScale(1.0f, 1.0f, 1.0f)
+                    * Matrix4x4.CreateTranslation(translation)
+                    * bone.Matrix;
                 float newDistanceSqr = Vector3.DistanceSquared(MatrixUtils.DecomposeTranslation(newMatrix), bone.OriginalTranslation);
 
-                // check if the new matrix overpasses the distance limits
                 if (newDistanceSqr > currentDistanceSqr)
                     return false;
 

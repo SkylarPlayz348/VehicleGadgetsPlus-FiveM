@@ -1,8 +1,7 @@
-﻿namespace VehicleGadgetsPlus.Memory
+namespace VehicleGadgetsPlus.Memory
 {
+    using System.Numerics;
     using System.Runtime.InteropServices;
-
-    using Rage;
 
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct NativeVector3
@@ -23,13 +22,7 @@
         public float Z;
         public float W;
 
-        public NativeVector4(float x, float y, float z, float w)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            W = w;
-        }
+        public NativeVector4(float x, float y, float z, float w) { X = x; Y = y; Z = z; W = w; }
 
         public static implicit operator Vector4(NativeVector4 value) => new Vector4(value.X, value.Y, value.Z, value.W);
         public static implicit operator Quaternion(NativeVector4 value) => new Quaternion(value.X, value.Y, value.Z, value.W);

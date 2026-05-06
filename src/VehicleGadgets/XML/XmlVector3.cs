@@ -1,8 +1,7 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets.XML
+namespace VehicleGadgetsPlus.VehicleGadgets.XML
 {
+    using System.Numerics;
     using System.Xml.Serialization;
-
-    using Rage;
 
     public sealed class XmlVector3
     {

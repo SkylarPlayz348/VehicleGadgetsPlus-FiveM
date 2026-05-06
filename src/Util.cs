@@ -1,23 +1,22 @@
-﻿namespace VehicleGadgetsPlus
+namespace VehicleGadgetsPlus
 {
     using System;
     using System.IO;
+    using System.Numerics;
     using System.Xml.Serialization;
 
-    using Rage;
-    using Rage.Exceptions;
+    using CitizenFX.Core;
 
     using VehicleGadgetsPlus.Memory;
 
     internal static unsafe class Util
     {
-        // unlike the native/RPH's method, this one works with bones with custom names,
-        // for example for a bone named "ladder_base", the native will return -1 but
-        // this method will return the proper index.
+        // Unlike the native/RPH method, this one works with bones that have custom names
+        // (e.g. "ladder_base") that the native GET_ENTITY_BONE_INDEX_BY_NAME can't find.
         public static int GetBoneIndex(Vehicle vehicle, string boneName)
         {
-            if (!vehicle)
-                throw new InvalidHandleableException(vehicle);
+            if (vehicle == null || !vehicle.Exists())
+                throw new ArgumentException("Vehicle is null or does not exist", nameof(vehicle));
 
             CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
             crSkeletonData* skelData = veh->Inst->CacheEntry->Skeleton->Data;
@@ -67,68 +66,26 @@
 
     internal static class MatrixUtils
     {
-        // https://code.google.com/archive/p/slimmath/
-        public static bool Decompose(Matrix matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
+        public static bool Decompose(Matrix4x4 matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
-            const float ZeroTolerance = 1e-6f;
-
-            //Source: Unknown
-            //References: http://www.gamedev.net/community/forums/topic.asp?topic_id=441695
-
-            //Get the translation.
-            translation.X = matrix.M41;
-            translation.Y = matrix.M42;
-            translation.Z = matrix.M43;
-
-            //Scaling is the length of the rows.
-            scale.X = (float)Math.Sqrt((matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12) + (matrix.M13 * matrix.M13));
-            scale.Y = (float)Math.Sqrt((matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23));
-            scale.Z = (float)Math.Sqrt((matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32) + (matrix.M33 * matrix.M33));
-
-            //If any of the scaling factors are zero, than the rotation matrix can not exist.
-            if (Math.Abs(scale.X) < ZeroTolerance ||
-                Math.Abs(scale.Y) < ZeroTolerance ||
-                Math.Abs(scale.Z) < ZeroTolerance)
-            {
-                rotation = Quaternion.Identity;
-                return false;
-            }
-
-            //The rotation is the left over matrix after dividing out the scaling.
-            Matrix rotationmatrix = new Matrix();
-            rotationmatrix.M11 = matrix.M11 / scale.X;
-            rotationmatrix.M12 = matrix.M12 / scale.X;
-            rotationmatrix.M13 = matrix.M13 / scale.X;
-
-            rotationmatrix.M21 = matrix.M21 / scale.Y;
-            rotationmatrix.M22 = matrix.M22 / scale.Y;
-            rotationmatrix.M23 = matrix.M23 / scale.Y;
-
-            rotationmatrix.M31 = matrix.M31 / scale.Z;
-            rotationmatrix.M32 = matrix.M32 / scale.Z;
-            rotationmatrix.M33 = matrix.M33 / scale.Z;
-
-            rotationmatrix.M44 = 1f;
-
-            Quaternion.RotationMatrix(ref rotationmatrix, out rotation);
-            return true;
+            return Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
         }
 
-        public static Vector3 DecomposeScale(Matrix matrix)
+        public static Vector3 DecomposeScale(Matrix4x4 matrix)
         {
-            Decompose(matrix, out Vector3 scale, out _, out _);
+            Matrix4x4.Decompose(matrix, out Vector3 scale, out _, out _);
             return scale;
         }
 
-        public static Quaternion DecomposeRotation(Matrix matrix)
+        public static Quaternion DecomposeRotation(Matrix4x4 matrix)
         {
-            Decompose(matrix, out _, out Quaternion rotation, out _);
+            Matrix4x4.Decompose(matrix, out _, out Quaternion rotation, out _);
             return rotation;
         }
 
-        public static Vector3 DecomposeTranslation(Matrix matrix)
+        public static Vector3 DecomposeTranslation(Matrix4x4 matrix)
         {
-            Decompose(matrix, out _, out _, out Vector3 translation);
+            Matrix4x4.Decompose(matrix, out _, out _, out Vector3 translation);
             return translation;
         }
     }
@@ -143,13 +100,10 @@
 
         public static Quaternion Slerp(ref Quaternion a, ref Quaternion b, float t, bool longestPath)
         {
-            // if either input is zero, return the other.
             if (a.LengthSquared() == 0.0f)
             {
                 if (b.LengthSquared() == 0.0f)
-                {
                     return Quaternion.Identity;
-                }
                 return b;
             }
             else if (b.LengthSquared() == 0.0f)
@@ -157,42 +111,36 @@
                 return a;
             }
 
-
             float cosHalfAngle = a.W * b.W + Vector3.Dot(new Vector3(a.X, a.Y, a.Z), new Vector3(b.X, b.Y, b.Z));
 
             if (cosHalfAngle >= 1.0f || cosHalfAngle <= -1.0f)
-            {
-                // angle = 0.0f, so just return one input.
                 return a;
-            }
-            else if (longestPath || (!longestPath && cosHalfAngle < 0.0f))
+
+            if (longestPath || (!longestPath && cosHalfAngle < 0.0f))
             {
-                b.X = -b.X;
-                b.Y = -b.Y;
-                b.Z = -b.Z;
-                b.W = -b.W;
+                b.X = -b.X; b.Y = -b.Y; b.Z = -b.Z; b.W = -b.W;
                 cosHalfAngle = -cosHalfAngle;
             }
 
-            float blendA;
-            float blendB;
+            float blendA, blendB;
             if (cosHalfAngle < 0.99f)
             {
-                // do proper slerp for big angles
-                float halfAngle = (float)System.Math.Acos(cosHalfAngle);
-                float sinHalfAngle = (float)System.Math.Sin(halfAngle);
+                float halfAngle = (float)Math.Acos(cosHalfAngle);
+                float sinHalfAngle = (float)Math.Sin(halfAngle);
                 float oneOverSinHalfAngle = 1.0f / sinHalfAngle;
-                blendA = (float)System.Math.Sin(halfAngle * (1.0f - t)) * oneOverSinHalfAngle;
-                blendB = (float)System.Math.Sin(halfAngle * t) * oneOverSinHalfAngle;
+                blendA = (float)Math.Sin(halfAngle * (1.0f - t)) * oneOverSinHalfAngle;
+                blendB = (float)Math.Sin(halfAngle * t) * oneOverSinHalfAngle;
             }
             else
             {
-                // do lerp if angle is really small.
                 blendA = 1.0f - t;
                 blendB = t;
             }
 
-            Quaternion result = new Quaternion(blendA * new Vector3(a.X, a.Y, a.Z) + blendB * new Vector3(b.X, b.Y, b.Z), blendA * a.W + blendB * b.W);
+            Quaternion result = new Quaternion(
+                blendA * new Vector3(a.X, a.Y, a.Z) + blendB * new Vector3(b.X, b.Y, b.Z),
+                blendA * a.W + blendB * b.W);
+
             if (result.LengthSquared() > 0.0f)
                 return Quaternion.Normalize(result);
             else

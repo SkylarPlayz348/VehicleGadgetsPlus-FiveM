@@ -1,9 +1,8 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets.XML
+namespace VehicleGadgetsPlus.VehicleGadgets.XML
 {
     using System;
+    using System.Numerics;
     using System.Xml.Serialization;
-
-    using Rage;
 
     [XmlType(TypeName = XmlName)]
     public sealed class LadderEntry : VehicleGadgetEntry

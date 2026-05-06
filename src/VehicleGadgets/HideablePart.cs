@@ -1,8 +1,9 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets
+namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
+    using System.Numerics;
 
-    using Rage;
+    using CitizenFX.Core;
 
     using VehicleGadgetsPlus.Memory;
     using VehicleGadgetsPlus.Conditions;
@@ -24,7 +25,7 @@
 
             if (!VehicleBone.TryGetForVehicle(vehicle, hideablePartDataEntry.BoneName, out bone))
             {
-                throw new InvalidOperationException($"The model \"{vehicle.Model.Name}\" doesn't have the bone \"{hideablePartDataEntry.BoneName}\" for the {HideablePartEntry.XmlName}");
+                throw new InvalidOperationException($"The model \"{vehicle.Model.Hash}\" doesn't have the bone \"{hideablePartDataEntry.BoneName}\" for the {HideablePartEntry.XmlName}");
             }
 
             conditions = Conditions.GetConditionsFromString(vehicle.Model, hideablePartDataEntry.Conditions);
@@ -44,7 +45,6 @@
                     if (value.HasValue && value.Value)
                     {
                         visible = !visible;
-
                         UpdateBone();
                     }
                 }
@@ -68,46 +68,29 @@
         private void UpdateBone()
         {
             if (visible)
-            {
                 Show();
-            }
             else
-            {
                 Hide();
-            }
         }
 
         private void Show()
         {
             if (hasBound)
-            {
                 ShowBound();
-            }
             else
-            {
                 bone.ResetTranslation();
-            }
         }
 
         private void ShowBound()
         {
             fragInstGta* inst = nativeVeh->Inst;
-            if (inst == null)
-            {
-                return;
-            }
+            if (inst == null) return;
 
             fragCacheEntry* entry = inst->CacheEntry;
-            if (entry == null)
-            {
-                return;
-            }
+            if (entry == null) return;
 
             int** flags = entry->BrokenAndHiddenComponentsFlags;
-            if (flags == null)
-            {
-                return;
-            }
+            if (flags == null) return;
 
             (*flags)[boundIndex >> 5] &= ~(1 << (boundIndex & 0x1F));
         }
@@ -115,53 +98,35 @@
         private void Hide()
         {
             if (hasBound)
-            {
                 HideBound();
-            }
             else
-            {
                 bone.SetTranslation(new Vector3(0.0f, 0.0f, -99999.9f));
-            }
         }
 
         private void HideBound()
         {
             fragInstGta* inst = nativeVeh->Inst;
-            if (inst == null)
-            {
-                return;
-            }
+            if (inst == null) return;
 
             fragCacheEntry* entry = inst->CacheEntry;
-            if (entry == null)
-            {
-                return;
-            }
+            if (entry == null) return;
 
             int** flags = entry->BrokenAndHiddenComponentsFlags;
-            if (flags == null)
-            {
-                return;
-            }
+            if (flags == null) return;
 
             (*flags)[boundIndex >> 5] |= 1 << (boundIndex & 0x1F);
         }
 
         private bool? CheckConditions(bool isPlayerIn)
         {
-            if(conditions.Length <= 0)
-            {
+            if (conditions.Length <= 0)
                 return null;
-            }
 
             for (int i = 0; i < conditions.Length; i++)
             {
                 bool? v = conditions[i].Invoke(Vehicle, isPlayerIn);
-                if (!v.HasValue)
-                    return null;
-
-                if (!v.Value)
-                    return false;
+                if (!v.HasValue) return null;
+                if (!v.Value) return false;
             }
 
             return true;

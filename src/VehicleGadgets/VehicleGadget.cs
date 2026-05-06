@@ -1,8 +1,8 @@
-﻿namespace VehicleGadgetsPlus.VehicleGadgets
+namespace VehicleGadgetsPlus.VehicleGadgets
 {
     using System;
 
-    using Rage;
+    using CitizenFX.Core;
 
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
@@ -24,7 +24,6 @@
             Dispose(false);
         }
 
-        #region IDisposable Support
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -38,14 +37,12 @@
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
 
         public abstract void Update(bool isPlayerIn);
 
-
         public static VehicleGadget[] GetGadgetsForVehicle(Vehicle vehicle)
         {
-            if(Plugin.VehicleConfigsByModel.TryGetValue(vehicle.Model, out VehicleConfig config))
+            if (Plugin.VehicleConfigsByModel.TryGetValue(vehicle.Model, out VehicleConfig config))
             {
                 VehicleGadget[] g = new VehicleGadget[config.Gadgets.Length];
                 for (int i = 0; i < config.Gadgets.Length; i++)

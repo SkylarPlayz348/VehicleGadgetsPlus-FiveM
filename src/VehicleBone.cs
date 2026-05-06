@@ -1,6 +1,9 @@
-﻿namespace VehicleGadgetsPlus
+namespace VehicleGadgetsPlus
 {
-    using Rage;
+    using System;
+    using System.Numerics;
+
+    using CitizenFX.Core;
 
     using VehicleGadgetsPlus.Memory;
 
@@ -12,7 +15,7 @@
 
         public Vehicle Vehicle => vehicle;
         public int Index => index;
-        public Matrix Matrix
+        public Matrix4x4 Matrix
         {
             get => inst->CacheEntry->Skeleton->ObjectMatrices[index];
             set => inst->CacheEntry->Skeleton->ObjectMatrices[index] = value;
@@ -26,7 +29,7 @@
             this.vehicle = vehicle;
             this.index = index;
 
-            CVehicle* veh = ((CVehicle*)vehicle.MemoryAddress);
+            CVehicle* veh = (CVehicle*)vehicle.MemoryAddress;
             inst = veh->Inst;
 
             OriginalTranslation = Util.GetBoneOriginalTranslation(vehicle, index);
@@ -36,14 +39,18 @@
         public void RotateAxis(Vector3 axis, float degrees)
         {
             NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
-            Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.RotationAxis(axis, MathHelper.ConvertDegreesToRadians(degrees)) * (*matrix);
+            Matrix4x4 newMatrix = Matrix4x4.CreateScale(1.0f, 1.0f, 1.0f)
+                * Matrix4x4.CreateFromAxisAngle(axis, degrees * ((float)Math.PI / 180f))
+                * (*matrix);
             *matrix = newMatrix;
         }
 
         public void Translate(Vector3 translation)
         {
             NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
-            Matrix newMatrix = Matrix.Scaling(1.0f, 1.0f, 1.0f) * Matrix.Translation(translation) * (*matrix);
+            Matrix4x4 newMatrix = Matrix4x4.CreateScale(1.0f, 1.0f, 1.0f)
+                * Matrix4x4.CreateTranslation(translation)
+                * (*matrix);
             *matrix = newMatrix;
         }
 
@@ -51,7 +58,9 @@
         {
             NativeMatrix4x4* matrix = &(inst->CacheEntry->Skeleton->ObjectMatrices[index]);
             MatrixUtils.Decompose(*matrix, out Vector3 scale, out _, out Vector3 translation);
-            Matrix newMatrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotation) * Matrix.Translation(translation);
+            Matrix4x4 newMatrix = Matrix4x4.CreateScale(scale)
+                * Matrix4x4.CreateFromQuaternion(rotation)
+                * Matrix4x4.CreateTranslation(translation);
             *matrix = newMatrix;
         }
 
@@ -65,7 +74,6 @@
 
         public void ResetRotation() => SetRotation(OriginalRotation);
         public void ResetTranslation() => SetTranslation(OriginalTranslation);
-
 
         public static bool TryGetForVehicle(Vehicle vehicle, string boneName, out VehicleBone bone)
         {
