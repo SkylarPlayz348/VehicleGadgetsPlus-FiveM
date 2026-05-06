@@ -21,7 +21,7 @@ namespace VehicleGadgetsPlus.Memory
             IntPtr address = FindPattern("85 D2 78 44 4C 8B 49 68 4D 85 C9 74 29 49 8B 81");
             if (address != IntPtr.Zero)
             {
-                fragInst_GetBoundIndexForBone = Marshal.GetDelegateForFunctionPointer<fragInst_GetBoundIndexForBone_Delegate>(address);
+                fragInst_GetBoundIndexForBone = Marshal.GetDelegateForFunctionPointer(address, typeof(fragInst_GetBoundIndexForBone_Delegate));
                 CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] Found {nameof(fragInst_GetBoundIndexForBone)} at 0x{address.ToInt64():X}");
             }
             else
@@ -33,7 +33,7 @@ namespace VehicleGadgetsPlus.Memory
             address = FindPattern("48 8B C4 48 89 58 18 44 88 48 20 88 50 10 55 56 57");
             if (address != IntPtr.Zero)
             {
-                fragInst_PoseBoundsFromSkeleton = Marshal.GetDelegateForFunctionPointer<fragInst_PoseBoundsFromSkeleton_Delegate>(address);
+                fragInst_PoseBoundsFromSkeleton = Marshal.GetDelegateForFunctionPointer(address, typeof(fragInst_GetBoundIndexForBone_Delegate));
                 CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] Found {nameof(fragInst_PoseBoundsFromSkeleton)} at 0x{address.ToInt64():X}");
             }
             else
