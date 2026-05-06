@@ -1,2 +1,27 @@
-Cannot implicitly convert type 'System.Delegate' to 'VehicleGadgetsPlus.Memory.GameFunctions.fragInst_PoseBoundsFromSkeleton_Delegate'. An explicit conversion exists (are you missing a cast?)
-Cannot implicitly convert type 'System.Delegate' to 'VehicleGadgetsPlus.Memory.GameFunctions.fragInst_GetBoundIndexForBone_Delegate'. An explicit conversion exists (are you missing a cast?)
+[    121766] [b3570_GTAProce]             MainThrd/ Loaded VehicleGadgetsPlus.net, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null into ScriptDomain_83504589
+[    121781] [b3570_GTAProce]             MainThrd/ Failed to instantiate instance of script VehicleGadgetsPlus.Plugin: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.MethodAccessException: Error verifying VehicleGadgetsPlus.Memory.GameFunctions:FindPattern (string): Method System.Diagnostics.Process:GetCurrentProcess () is not accessible at 0x006c
+
+[    121781] [b3570_GTAProce]             MainThrd/   at VehicleGadgetsPlus.Memory.GameFunctions.Init () [0x00002] in <2ce22f45a1fe4c0b960a8fc9e90a3cc6>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at VehicleGadgetsPlus.Plugin..ctor () [0x00027] in <2ce22f45a1fe4c0b960a8fc9e90a3cc6>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at (wrapper managed-to-native) System.Reflection.MonoCMethod:InternalInvoke (System.Reflection.MonoCMethod,object,object[],System.Exception&)
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00002] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/    --- End of inner exception stack trace ---
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00014] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceMono (System.Boolean nonPublic) [0x000a8] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceSlow (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00009] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceDefaultCtor (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00027] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type, System.Boolean nonPublic) [0x00020] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type) [0x00000] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+
+[    121781] [b3570_GTAProce]             MainThrd/   at CitizenFX.Core.InternalManager.CreateAssemblyInternal (System.String assemblyFile, System.Byte[] assemblyData, System.Byte[] symbolData) [0x000c4] in C:\gl\builds\cfx-fivem-0\code\client\clrcore\InternalManager.cs:156 
+
