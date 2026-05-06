@@ -12,7 +12,9 @@ namespace VehicleGadgetsPlus
     using VehicleGadgetsPlus.VehicleGadgets;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    internal unsafe class Plugin : BaseScript
+    // Not marked unsafe at class level — async methods cannot be in an unsafe context.
+    // Pointer work is isolated in the static unsafe helpers below.
+    internal class Plugin : BaseScript
     {
         public const string VehicleConfigsFolder = "Vehicle Gadgets+/";
         public const string SoundsFolder = VehicleConfigsFolder + "Sounds/";
@@ -41,12 +43,6 @@ namespace VehicleGadgetsPlus
         private async Task OnTick()
         {
             Input.Update();
-
-            if (API.IsGamePaused())
-            {
-                await Delay(0);
-                return;
-            }
 
             Ped playerPed = Game.PlayerPed;
             Vehicle playerVeh = (playerPed != null && playerPed.Exists()) ? playerPed.CurrentVehicle : null;
@@ -77,16 +73,22 @@ namespace VehicleGadgetsPlus
 
             foreach (Vehicle v in vehiclesRequiringPoseBounds)
             {
-                CVehicle* cveh = (CVehicle*)v.MemoryAddress;
-                fragInstGta* inst = cveh->Inst;
-                if (inst == null)
-                    continue;
-
-                GameFunctions.fragInst_PoseBoundsFromSkeleton(inst, true, true, true, 0, 0);
+                ApplyPoseBounds(v);
             }
             vehiclesRequiringPoseBounds.Clear();
 
             await Delay(0);
+        }
+
+        // Isolated here so the async OnTick above is never in an unsafe context.
+        private static unsafe void ApplyPoseBounds(Vehicle v)
+        {
+            CVehicle* cveh = (CVehicle*)v.MemoryAddress;
+            fragInstGta* inst = cveh->Inst;
+            if (inst == null)
+                return;
+
+            GameFunctions.fragInst_PoseBoundsFromSkeleton(inst, true, true, true, 0, 0);
         }
 
         private void CreateGadgetsForVehicle(Vehicle vehicle)
