@@ -92,5 +92,8 @@
     <None Include="Resources\default_ladder_end.wav" />
     <None Include="Resources\default_outriggers_loop.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="errors.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
