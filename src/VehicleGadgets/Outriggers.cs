@@ -7,6 +7,9 @@ namespace VehicleGadgetsPlus.VehicleGadgets
     using CitizenFX.Core;
     using CitizenFX.Core.Native;
 
+    using Vector3 = System.Numerics.Vector3;
+    using Quaternion = System.Numerics.Quaternion;
+
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
     internal sealed class Outriggers : VehicleGadget

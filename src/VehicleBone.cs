@@ -5,6 +5,9 @@ namespace VehicleGadgetsPlus
 
     using CitizenFX.Core;
 
+    using Vector3 = System.Numerics.Vector3;
+    using Quaternion = System.Numerics.Quaternion;
+
     using VehicleGadgetsPlus.Memory;
 
     internal unsafe class VehicleBone

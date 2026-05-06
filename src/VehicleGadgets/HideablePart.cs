@@ -5,6 +5,9 @@ namespace VehicleGadgetsPlus.VehicleGadgets
 
     using CitizenFX.Core;
 
+    using Vector3 = System.Numerics.Vector3;
+    using Quaternion = System.Numerics.Quaternion;
+
     using VehicleGadgetsPlus.Memory;
     using VehicleGadgetsPlus.Conditions;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
