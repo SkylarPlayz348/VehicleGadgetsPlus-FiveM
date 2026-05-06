@@ -1,7 +1,8 @@
+using CitizenFX.Core.Native;
+
 namespace VehicleGadgetsPlus.Memory
 {
     using System;
-    using System.Diagnostics;
     using System.Runtime.InteropServices;
 
     internal static unsafe class GameFunctions
@@ -47,38 +48,7 @@ namespace VehicleGadgetsPlus.Memory
 
         private static IntPtr FindPattern(string pattern)
         {
-            string[] parts = pattern.Split(' ');
-            byte[] bytes = new byte[parts.Length];
-            bool[] wildcards = new bool[parts.Length];
-
-            for (int i = 0; i < parts.Length; i++)
-            {
-                if (parts[i] == "??" || parts[i] == "?")
-                    wildcards[i] = true;
-                else
-                    bytes[i] = Convert.ToByte(parts[i], 16);
-            }
-
-            ProcessModule module = Process.GetCurrentProcess().MainModule;
-            byte* moduleBase = (byte*)module.BaseAddress;
-            int moduleSize = module.ModuleMemorySize;
-
-            for (int i = 0; i < moduleSize - bytes.Length; i++)
-            {
-                bool found = true;
-                for (int j = 0; j < bytes.Length; j++)
-                {
-                    if (!wildcards[j] && moduleBase[i + j] != bytes[j])
-                    {
-                        found = false;
-                        break;
-                    }
-                }
-                if (found)
-                    return new IntPtr(moduleBase + i);
-            }
-
-            return IntPtr.Zero;
+            return CitizenFX.Core.Native.API.FindPattern(pattern);
         }
     }
 }
