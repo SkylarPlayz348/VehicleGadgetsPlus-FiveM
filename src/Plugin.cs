@@ -123,12 +123,17 @@ namespace VehicleGadgetsPlus
             }
 
             int loaded = 0;
-            foreach (string fileName in Directory.EnumerateFiles(VehicleConfigsFolder, "*.xml", SearchOption.TopDirectoryOnly))
+
+            string[] files = Directory.GetFiles(VehicleConfigsFolder, "*.xml", SearchOption.TopDirectoryOnly);
+
+            foreach (string fileName in files)
             {
                 try
                 {
                     string modelName = Path.GetFileNameWithoutExtension(fileName);
+
                     VehicleConfig cfg = Util.Deserialize<VehicleConfig>(fileName);
+
                     Model m = new Model(modelName);
 
                     if (cfg.ExtraConditions != null && cfg.ExtraConditions.Length > 0)
@@ -137,7 +142,9 @@ namespace VehicleGadgetsPlus
                     }
 
                     VehicleConfigsByModel.Add(m, cfg);
+
                     Debug.WriteLine($"[VehicleGadgets+] Loaded config for '{modelName}' (hash 0x{m.Hash:X})");
+
                     loaded++;
                 }
                 catch (System.Exception ex)
@@ -147,6 +154,7 @@ namespace VehicleGadgetsPlus
             }
 
             Debug.WriteLine($"[VehicleGadgets+] Loaded {loaded} vehicle config(s).");
+
             Conditions.Conditions.LoadConditions(null);
         }
     }
