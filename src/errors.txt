@@ -1,24 +1,24 @@
-[   3621922] [b3570_GTAProce]             MainThrd/ Failed to instantiate instance of script VehicleGadgetsPlus.Plugin: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.TypeLoadException: Error verifying VehicleGadgetsPlus.Plugin:LoadVehicleConfigs (): Could not load type System.IO.DirectoryInfo at 0x0020
+[   3908047] [b3570_GTAProce]             MainThrd/ Failed to instantiate instance of script VehicleGadgetsPlus.Plugin: System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.TypeLoadException: Error verifying VehicleGadgetsPlus.Plugin:LoadVehicleConfigs (): Could not load type System.IO.DirectoryInfo at 0x0020
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at VehicleGadgetsPlus.Plugin..ctor () [0x0002d] in <d747a65875cd4a7fb53132c4f4b2e19e>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at VehicleGadgetsPlus.Plugin..ctor () [0x0002d] in <e0cae1ce69434044a1616e33be0786f3>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at (wrapper managed-to-native) System.Reflection.MonoCMethod:InternalInvoke (System.Reflection.MonoCMethod,object,object[],System.Exception&)
+[   3908047] [b3570_GTAProce]             MainThrd/   at (wrapper managed-to-native) System.Reflection.MonoCMethod:InternalInvoke (System.Reflection.MonoCMethod,object,object[],System.Exception&)
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00002] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00002] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/    --- End of inner exception stack trace ---
+[   3908047] [b3570_GTAProce]             MainThrd/    --- End of inner exception stack trace ---
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00014] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.Reflection.MonoCMethod.InternalInvoke (System.Object obj, System.Object[] parameters) [0x00014] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceMono (System.Boolean nonPublic) [0x000a8] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceMono (System.Boolean nonPublic) [0x000a8] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceSlow (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00009] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceSlow (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00009] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceDefaultCtor (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00027] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.RuntimeType.CreateInstanceDefaultCtor (System.Boolean publicOnly, System.Boolean skipCheckThis, System.Boolean fillCache, System.Threading.StackCrawlMark& stackMark) [0x00027] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type, System.Boolean nonPublic) [0x00020] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type, System.Boolean nonPublic) [0x00020] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type) [0x00000] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
+[   3908047] [b3570_GTAProce]             MainThrd/   at System.Activator.CreateInstance (System.Type type) [0x00000] in <b575c7ac070e41ffa0751333b6ac9f42>:0 
 
-[   3621922] [b3570_GTAProce]             MainThrd/   at CitizenFX.Core.InternalManager.CreateAssemblyInternal (System.String assemblyFile, System.Byte[] assemblyData, System.Byte[] symbolData) [0x000c4] in C:\gl\builds\cfx-fivem-0\code\client\clrcore\InternalManager.cs:156 
-[   3621922] [b3570_GTAProce]             MainThrd/ OnConnectionProgress: Mounted VehicleGadgetsV (1 of 1)
+[   3908047] [b3570_GTAProce]             MainThrd/   at CitizenFX.Core.InternalManager.CreateAssemblyInternal (System.String assemblyFile, System.Byte[] assemblyData, System.Byte[] symbolData) [0x000c4] in C:\gl\builds\cfx-fivem-0\code\client\clrcore\InternalManager.cs:156 
+[   3908047] [b3570_GTAProce]             MainThrd/ OnConnectionProgress: Mounted VehicleGadgetsV (1 of 1)
