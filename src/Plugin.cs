@@ -12,11 +12,9 @@ namespace VehicleGadgetsPlus
     using VehicleGadgetsPlus.VehicleGadgets;
     using VehicleGadgetsPlus.VehicleGadgets.XML;
 
-    // Not marked unsafe at class level — async methods cannot be in an unsafe context.
-    // Pointer work is isolated in the static unsafe helpers below.
     internal class Plugin : BaseScript
     {
-        public const string VehicleConfigsFolder = "Vehicle Gadgets+/";
+        public const string VehicleConfigsFolder = "Gadgets/";
         public const string SoundsFolder = VehicleConfigsFolder + "Sounds/";
         public const string ConditionsFolder = VehicleConfigsFolder + "Conditions/";
 
@@ -28,14 +26,10 @@ namespace VehicleGadgetsPlus
 
         public Plugin()
         {
-            bool gameFnInit = GameFunctions.Init();
-            if (!gameFnInit)
-            {
-                Debug.WriteLine($"[VehicleGadgets+] [ERROR] Failed to initialize {nameof(GameFunctions)}, gadgets will not function.");
-                return;
-            }
+            // Pattern scan for native functions — non-fatal, we keep going either way.
+            // Check F8 console to see which functions were (or weren't) found.
+            GameFunctions.Init();
 
-            Debug.WriteLine($"[VehicleGadgets+] Successful {nameof(GameFunctions)} init");
             LoadVehicleConfigs();
             Tick += OnTick;
         }
@@ -57,7 +51,15 @@ namespace VehicleGadgetsPlus
                 VehicleGadget g = gadgets[i];
                 if (g.Vehicle != null && g.Vehicle.Exists())
                 {
-                    g.Update(g.Vehicle == playerVeh);
+                    try
+                    {
+                        g.Update(g.Vehicle == playerVeh);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.WriteLine($"[VehicleGadgets+] Error updating gadget {g.GetType().Name}: {ex.Message}");
+                    }
+
                     if (g.RequiresPoseBounds)
                     {
                         vehiclesRequiringPoseBounds.Add(g.Vehicle);
@@ -71,70 +73,81 @@ namespace VehicleGadgetsPlus
                 }
             }
 
-            foreach (Vehicle v in vehiclesRequiringPoseBounds)
+            if (GameFunctions.fragInst_PoseBoundsFromSkeleton != null)
             {
-                ApplyPoseBounds(v);
+                foreach (Vehicle v in vehiclesRequiringPoseBounds)
+                {
+                    ApplyPoseBounds(v);
+                }
             }
             vehiclesRequiringPoseBounds.Clear();
 
             await Delay(0);
         }
 
-        // Isolated here so the async OnTick above is never in an unsafe context.
         private static unsafe void ApplyPoseBounds(Vehicle v)
         {
             CVehicle* cveh = (CVehicle*)v.MemoryAddress;
             fragInstGta* inst = cveh->Inst;
             if (inst == null)
                 return;
-
             GameFunctions.fragInst_PoseBoundsFromSkeleton(inst, true, true, true, 0, 0);
         }
 
         private void CreateGadgetsForVehicle(Vehicle vehicle)
         {
-            VehicleGadget[] g = VehicleGadget.GetGadgetsForVehicle(vehicle);
-            if (g != null)
+            try
             {
-                gadgets.AddRange(g);
+                VehicleGadget[] g = VehicleGadget.GetGadgetsForVehicle(vehicle);
+                if (g != null)
+                {
+                    gadgets.AddRange(g);
+                    Debug.WriteLine($"[VehicleGadgets+] Created {g.Length} gadget(s) for model 0x{vehicle.Model.Hash:X}");
+                }
             }
+            catch (System.Exception ex)
+            {
+                Debug.WriteLine($"[VehicleGadgets+] Error creating gadgets for model 0x{vehicle.Model.Hash:X}: {ex.Message}");
+            }
+
             vehiclesChecked.Add(vehicle.Handle);
         }
 
         private static void LoadVehicleConfigs()
         {
             if (!Directory.Exists(VehicleConfigsFolder))
+            {
+                Debug.WriteLine($"[VehicleGadgets+] Config folder '{VehicleConfigsFolder}' not found — creating it.");
                 Directory.CreateDirectory(VehicleConfigsFolder);
+                return;
+            }
 
-            Dictionary<Model, ConditionEntry[]> extraConditions = null;
+            int loaded = 0;
             foreach (string fileName in Directory.EnumerateFiles(VehicleConfigsFolder, "*.xml", SearchOption.TopDirectoryOnly))
             {
                 try
                 {
                     string modelName = Path.GetFileNameWithoutExtension(fileName);
-                    Debug.WriteLine($"[VehicleGadgets+] Loading config for {modelName}...");
                     VehicleConfig cfg = Util.Deserialize<VehicleConfig>(fileName);
                     Model m = new Model(modelName);
+
                     if (cfg.ExtraConditions != null && cfg.ExtraConditions.Length > 0)
                     {
-                        if (extraConditions == null)
-                            extraConditions = new Dictionary<Model, ConditionEntry[]>();
-                        extraConditions.Add(m, cfg.ExtraConditions);
+                        Debug.WriteLine($"[VehicleGadgets+] Note: ExtraConditions in {Path.GetFileName(fileName)} are not supported in FiveM and will be skipped.");
                     }
+
                     VehicleConfigsByModel.Add(m, cfg);
-                    Debug.WriteLine($"[VehicleGadgets+] Loaded config for {modelName}");
+                    Debug.WriteLine($"[VehicleGadgets+] Loaded config for '{modelName}' (hash 0x{m.Hash:X})");
+                    loaded++;
                 }
-                catch (System.InvalidOperationException ex)
+                catch (System.Exception ex)
                 {
-                    Debug.WriteLine($"[VehicleGadgets+] Can't load {Path.GetFileName(fileName)}: {ex}");
-                }
-                catch (System.Xml.XmlException ex)
-                {
-                    Debug.WriteLine($"[VehicleGadgets+] Can't load {Path.GetFileName(fileName)}: {ex}");
+                    Debug.WriteLine($"[VehicleGadgets+] Can't load {Path.GetFileName(fileName)}: {ex.Message}");
                 }
             }
 
-            Conditions.Conditions.LoadConditions(extraConditions);
+            Debug.WriteLine($"[VehicleGadgets+] Loaded {loaded} vehicle config(s).");
+            Conditions.Conditions.LoadConditions(null);
         }
     }
 }

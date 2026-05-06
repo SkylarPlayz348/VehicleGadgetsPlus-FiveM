@@ -34,8 +34,16 @@ namespace VehicleGadgetsPlus.VehicleGadgets
             conditions = Conditions.GetConditionsFromString(vehicle.Model, hideablePartDataEntry.Conditions);
 
             nativeVeh = (CVehicle*)vehicle.MemoryAddress;
-            boundIndex = GameFunctions.fragInst_GetBoundIndexForBone(nativeVeh->Inst, bone.Index);
-            hasBound = boundIndex != -1;
+            if (GameFunctions.fragInst_GetBoundIndexForBone != null)
+            {
+                boundIndex = GameFunctions.fragInst_GetBoundIndexForBone(nativeVeh->Inst, bone.Index);
+                hasBound = boundIndex != -1;
+            }
+            else
+            {
+                boundIndex = -1;
+                hasBound = false;
+            }
         }
 
         public override void Update(bool isPlayerIn)

@@ -11,6 +11,6 @@ client_scripts {
 }
 
 files {
-    'Vehicle Gadgets+/*.xml',
-    'Vehicle Gadgets+/Sounds/*',
+    'Gadgets/*.xml',
+    'Gadgets/Sounds/*',
 }

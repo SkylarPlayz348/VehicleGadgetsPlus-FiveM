@@ -4,8 +4,6 @@ namespace VehicleGadgetsPlus.Memory
     using System.Diagnostics;
     using System.Runtime.InteropServices;
 
-    using CitizenFX.Core;
-
     internal static unsafe class GameFunctions
     {
         public delegate int fragInst_GetBoundIndexForBone_Delegate(fragInstGta* inst, int boneIndex);
@@ -14,33 +12,37 @@ namespace VehicleGadgetsPlus.Memory
         public static fragInst_GetBoundIndexForBone_Delegate fragInst_GetBoundIndexForBone { get; private set; }
         public static fragInst_PoseBoundsFromSkeleton_Delegate fragInst_PoseBoundsFromSkeleton { get; private set; }
 
+        // Returns true only if both functions were found. Either way, delegates that
+        // were found are still set so partial functionality works.
         internal static bool Init()
         {
+            bool ok = true;
+
             IntPtr address = FindPattern("85 D2 78 44 4C 8B 49 68 4D 85 C9 74 29 49 8B 81");
-            if (AssertAddress(address, nameof(fragInst_GetBoundIndexForBone)))
+            if (address != IntPtr.Zero)
             {
                 fragInst_GetBoundIndexForBone = Marshal.GetDelegateForFunctionPointer<fragInst_GetBoundIndexForBone_Delegate>(address);
+                CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] Found {nameof(fragInst_GetBoundIndexForBone)} at 0x{address.ToInt64():X}");
+            }
+            else
+            {
+                CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] WARNING: Could not find {nameof(fragInst_GetBoundIndexForBone)} — HideablePart bound hiding will be disabled.");
+                ok = false;
             }
 
             address = FindPattern("48 8B C4 48 89 58 18 44 88 48 20 88 50 10 55 56 57");
-            if (AssertAddress(address, nameof(fragInst_PoseBoundsFromSkeleton)))
+            if (address != IntPtr.Zero)
             {
                 fragInst_PoseBoundsFromSkeleton = Marshal.GetDelegateForFunctionPointer<fragInst_PoseBoundsFromSkeleton_Delegate>(address);
+                CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] Found {nameof(fragInst_PoseBoundsFromSkeleton)} at 0x{address.ToInt64():X}");
             }
-
-            return !anyAssertFailed;
-        }
-
-        private static bool anyAssertFailed = false;
-        private static bool AssertAddress(IntPtr address, string name)
-        {
-            if (address == IntPtr.Zero)
+            else
             {
-                CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] Incompatible game version, couldn't find {name} function address.");
-                anyAssertFailed = true;
-                return false;
+                CitizenFX.Core.Debug.WriteLine($"[VehicleGadgets+] WARNING: Could not find {nameof(fragInst_PoseBoundsFromSkeleton)} — collision bounds won't update after bone moves.");
+                ok = false;
             }
-            return true;
+
+            return ok;
         }
 
         private static IntPtr FindPattern(string pattern)
