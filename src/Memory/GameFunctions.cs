@@ -1,7 +1,5 @@
 namespace VehicleGadgetsPlus.Memory
 {
-    using System.Runtime.InteropServices;
-
     internal static unsafe class GameFunctions
     {
         public delegate int fragInst_GetBoundIndexForBone_Delegate(fragInstGta* inst, int boneIndex);
